@@ -26,7 +26,7 @@ export interface TrackerStats {
 
 const CONTRIBUTIONS_KEY = 'oss-streak:contributions'
 const SETTINGS_KEY = 'oss-streak:settings'
-const DEFAULT_SETTINGS: TrackerSettings = { username: '', weeklyGoal: 5 }
+const DEFAULT_SETTINGS: TrackerSettings = { username: 'AdithyanandanArun', weeklyGoal: 5 }
 const KINDS = new Set<ContributionKind>(['comment', 'pull_request', 'review', 'commit'])
 const SOURCES = new Set<ContributionSource>(['github', 'manual'])
 
@@ -163,8 +163,9 @@ function eventContribution(event: GitHubEvent): Contribution | undefined {
     }
     case 'PushEvent': {
       kind = 'commit'
-      const count = Array.isArray(payload.commits) ? payload.commits.length : 0
-      title = `Pushed ${count || 'a'} commit${count === 1 ? '' : 's'}`
+      const commitCount = Array.isArray(payload.commits) ? payload.commits.length : 0
+      const count = commitCount || (typeof payload.size === 'number' && payload.size > 0 ? payload.size : 0)
+      title = count ? `Pushed ${count} commit${count === 1 ? '' : 's'}` : 'Pushed changes'
       url = typeof payload.url === 'string' ? payload.url : undefined
       break
     }

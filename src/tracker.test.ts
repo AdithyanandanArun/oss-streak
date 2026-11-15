@@ -46,7 +46,7 @@ describe('local storage', () => {
     data.set('oss-streak:contributions', '{bad')
     data.set('oss-streak:settings', 'null')
     expect(loadContributions()).toEqual([])
-    expect(loadSettings()).toEqual({ username: '', weeklyGoal: 5 })
+    expect(loadSettings()).toEqual({ username: 'AdithyanandanArun', weeklyGoal: 5 })
   })
 })
 
@@ -61,11 +61,13 @@ describe('fetchRecentActivity', () => {
       event('3', 'PullRequestReviewEvent', { pull_request: { title: 'Review me' } }),
       event('4', 'PushEvent', { commits: [{}, {}] }),
       event('5', 'WatchEvent'),
+      event('6', 'PushEvent'),
     ] }))
     const result = await fetchRecentActivity('octocat')
-    expect(result.map(({ kind }) => kind)).toEqual(['comment', 'pull_request', 'review', 'commit'])
+    expect(result.map(({ kind }) => kind)).toEqual(['comment', 'pull_request', 'review', 'commit', 'commit'])
     expect(result[0]).toMatchObject({ id: 'github:1', title: 'Commented on Bug', repository: 'octo/project', date: '2026-11-16' })
     expect(result[3].title).toBe('Pushed 2 commits')
+    expect(result[4].title).toBe('Pushed changes')
   })
 
   it('provides useful not-found and rate-limit errors', async () => {
