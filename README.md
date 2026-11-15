@@ -30,3 +30,7 @@ If you are developing a production application, we recommend enabling type-aware
 ```
 
 See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+
+## Activity data
+
+Recent activity is loaded from GitHub's public user events endpoint (`/users/{username}/events/public`, up to 100 events). GitHub only retains this event feed for a limited recent window (typically up to 90 days), and unauthenticated requests are subject to the public API rate limit; older or private activity may not appear. This app stores tracker settings and imported/manual contributions only in the browser's local storage; they are not sent to an app server.
