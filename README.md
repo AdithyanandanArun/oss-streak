@@ -1,36 +1,29 @@
-# React + TypeScript + Vite
+# streak.
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A small, local-first dashboard for building a steady open-source contribution habit. Import recent public GitHub activity, log contributions that GitHub's feed misses, and keep an eye on your weekly goal and streak.
 
-Currently, two official plugins are available:
+## Run locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```sh
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## How it works
 
-## Activity data
+- Public GitHub activity is fetched directly from the unauthenticated GitHub Events API. No GitHub sign-in, token, or backend is used.
+- GitHub's events feed is limited to recent public events (at most 100 are requested) and is rate-limited. It does not include private activity; manually log anything missing.
+- Contributions and preferences are saved in this browser's `localStorage`. They do not sync to another browser or device. Clearing browser data removes them.
+- A “contribution” in this tracker is any logged or imported event; this is a personal consistency aid, not an authoritative copy of GitHub's contribution graph.
 
-Recent activity is loaded from GitHub's public user events endpoint (`/users/{username}/events/public`, up to 100 events). GitHub only retains this event feed for a limited recent window (typically up to 90 days), and unauthenticated requests are subject to the public API rate limit; older or private activity may not appear. This app stores tracker settings and imported/manual contributions only in the browser's local storage; they are not sent to an app server.
+## Checks
+
+```sh
+npm test
+npm run lint
+npm run build
+```
+
+## Deploy
+
+The `main` branch has a GitHub Actions workflow that tests, builds, and deploys to GitHub Pages. The production base path is configured for the `oss-streak` repository.
