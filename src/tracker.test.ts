@@ -1,5 +1,5 @@
 import { afterAll, afterEach, describe, expect, it, vi } from 'vitest'
-import { fetchRecentActivity, getStats, loadContributions, loadSettings, saveContributions, saveSettings } from './tracker'
+import { fetchContributionCalendar, fetchRecentActivity, getStats, loadContributionCalendar, loadContributions, loadSettings, saveContributionCalendar, saveContributions, saveSettings } from './tracker'
 
 const contribution = (id: string, date: string) => ({ id, date, kind: 'commit' as const, title: 'Push', repository: 'owner/repo', source: 'manual' as const })
 
@@ -13,6 +13,16 @@ describe('getStats', () => {
     expect(getStats([contribution('a', '2026-11-15'), contribution('b', '2026-11-14')], '2026-11-16').currentStreak).toBe(2)
     expect(getStats([contribution('a', '2026-11-13')], '2026-11-16')).toMatchObject({ currentStreak: 0, bestStreak: 1, weekActions: 0 })
     expect(getStats([], '2026-11-16')).toEqual({ activeDays: 0, currentStreak: 0, bestStreak: 0, totalActions: 0, weekActions: 0 })
+  })
+
+  it('uses the full contribution graph for counts and streaks, not the capped event list', () => {
+    const items = [
+      { ...contribution('event', '2026-11-16'), source: 'github' as const },
+      contribution('manual-same-day', '2026-11-16'),
+      contribution('manual-extra-day', '2026-11-14'),
+    ]
+    const calendar = { username: 'octocat', days: [{ date: '2026-11-13', count: 0 }, { date: '2026-11-15', count: 3 }, { date: '2026-11-16', count: 5 }], total: 8, fetchedAt: '' }
+    expect(getStats(items, '2026-11-16', calendar)).toEqual({ activeDays: 3, currentStreak: 3, bestStreak: 3, totalActions: 9, weekActions: 5 })
   })
 })
 
@@ -40,6 +50,8 @@ describe('local storage', () => {
     expect(loadContributions()).toEqual([first])
     saveSettings({ username: ' octocat ', weeklyGoal: 7.8 })
     expect(loadSettings()).toEqual({ username: 'octocat', weeklyGoal: 7 })
+    saveContributionCalendar({ username: 'octocat', days: [{ date: '2026-11-16', count: 4 }], total: 4, fetchedAt: 'now' })
+    expect(loadContributionCalendar()).toMatchObject({ username: 'octocat', total: 4, days: [{ date: '2026-11-16', count: 4 }] })
   })
 
   it('recovers from malformed persisted data', () => {
@@ -75,5 +87,20 @@ describe('fetchRecentActivity', () => {
     await expect(fetchRecentActivity('nobody')).rejects.toThrow('was not found')
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 403, headers: new Headers() }))
     await expect(fetchRecentActivity('octocat')).rejects.toThrow('rate limit')
+  })
+})
+
+describe('fetchContributionCalendar', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('loads and totals a full-year daily calendar', async () => {
+    const fetchStub = vi.fn().mockResolvedValue({ ok: true, json: async () => ({
+      total: { lastYear: 1903 },
+      contributions: [{ date: '2025-11-16', count: 0, level: 0 }, { date: '2026-11-15', count: 1903, level: 4 }],
+    }) })
+    vi.stubGlobal('fetch', fetchStub)
+    const result = await fetchContributionCalendar('octocat')
+    expect(fetchStub).toHaveBeenCalledWith('https://github-contributions-api.jogruber.de/v4/octocat?y=last', expect.anything())
+    expect(result).toMatchObject({ username: 'octocat', total: 1903, days: [{ date: '2025-11-16', count: 0 }, { date: '2026-11-15', count: 1903 }] })
   })
 })

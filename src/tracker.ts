@@ -24,8 +24,21 @@ export interface TrackerStats {
   weekActions: number
 }
 
+export interface ContributionDay {
+  date: string
+  count: number
+}
+
+export interface ContributionCalendar {
+  username: string
+  days: ContributionDay[]
+  total: number
+  fetchedAt: string
+}
+
 const CONTRIBUTIONS_KEY = 'oss-streak:contributions'
 const SETTINGS_KEY = 'oss-streak:settings'
+const CALENDAR_KEY = 'oss-streak:calendar'
 const DEFAULT_SETTINGS: TrackerSettings = { username: 'AdithyanandanArun', weeklyGoal: 5 }
 const KINDS = new Set<ContributionKind>(['comment', 'pull_request', 'review', 'commit'])
 const SOURCES = new Set<ContributionSource>(['github', 'manual'])
@@ -116,6 +129,68 @@ export function saveSettings(settings: TrackerSettings): void {
   } catch {
     // Ignore unavailable browser storage.
   }
+}
+
+function normalizeCalendar(value: unknown): ContributionCalendar | undefined {
+  if (!isRecord(value) || typeof value.username !== 'string' || !Array.isArray(value.days)) return undefined
+  const days = new Map<string, number>()
+  for (const item of value.days) {
+    if (!isRecord(item) || typeof item.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(item.date)) continue
+    const parsed = new Date(`${item.date}T00:00:00`)
+    if (Number.isNaN(parsed.getTime()) || formatDate(parsed) !== item.date || typeof item.count !== 'number' || !Number.isInteger(item.count) || item.count < 0) continue
+    days.set(item.date, item.count)
+  }
+  if (!days.size) return undefined
+  const normalizedDays = [...days].map(([date, count]) => ({ date, count })).sort((a, b) => a.date.localeCompare(b.date))
+  return {
+    username: value.username.trim(),
+    days: normalizedDays,
+    total: normalizedDays.reduce((sum, item) => sum + item.count, 0),
+    fetchedAt: typeof value.fetchedAt === 'string' ? value.fetchedAt : '',
+  }
+}
+
+export function loadContributionCalendar(): ContributionCalendar | null {
+  try {
+    const raw = storage()?.getItem(CALENDAR_KEY)
+    return raw ? normalizeCalendar(JSON.parse(raw)) ?? null : null
+  } catch {
+    return null
+  }
+}
+
+export function saveContributionCalendar(calendar: ContributionCalendar): void {
+  try {
+    const normalized = normalizeCalendar(calendar)
+    if (normalized) storage()?.setItem(CALENDAR_KEY, JSON.stringify(normalized))
+  } catch {
+    // Ignore unavailable browser storage.
+  }
+}
+
+/** Full daily counts for the most recent year, fetched from the public contribution-calendar service. */
+export async function fetchContributionCalendar(username: string): Promise<ContributionCalendar> {
+  const cleanUsername = username.trim()
+  if (!cleanUsername) throw new Error('Enter a GitHub username.')
+  const response = await fetch(`https://github-contributions-api.jogruber.de/v4/${encodeURIComponent(cleanUsername)}?y=last`, {
+    headers: { Accept: 'application/json' },
+  })
+  if (!response.ok) {
+    if (response.status === 404) throw new Error(`GitHub user “${cleanUsername}” was not found.`)
+    throw new Error(`The full-year contribution calendar could not be loaded (HTTP ${response.status}).`)
+  }
+  let data: unknown
+  try {
+    data = await response.json()
+  } catch {
+    throw new Error('The contribution calendar service returned unreadable data.')
+  }
+  if (!isRecord(data) || !Array.isArray(data.contributions)) {
+    throw new Error('The contribution calendar service returned an unexpected response.')
+  }
+  const calendar = normalizeCalendar({ username: cleanUsername, days: data.contributions, fetchedAt: new Date().toISOString() })
+  if (!calendar) throw new Error('No daily contribution data was returned for that GitHub account.')
+  return calendar
 }
 
 interface GitHubEvent {
@@ -219,16 +294,34 @@ function shiftDate(date: Date, days: number): Date {
   return result
 }
 
-export function getStats(items: Contribution[], today = formatDate(new Date())): TrackerStats {
-  const validItems = normalizeContributions(items)
+function dailyCounts(items: Contribution[], calendar?: ContributionCalendar | null): Map<string, number> {
   const counts = new Map<string, number>()
-  for (const item of validItems) counts.set(item.date, (counts.get(item.date) ?? 0) + 1)
+  for (const day of calendar?.days ?? []) if (day.count > 0) counts.set(day.date, day.count)
+  const manualCounts = new Map<string, number>()
+  for (const item of normalizeContributions(items)) {
+    if (item.source !== 'manual') continue
+    manualCounts.set(item.date, (manualCounts.get(item.date) ?? 0) + 1)
+  }
+  for (const [date, manualCount] of manualCounts) {
+    // Keep logged actions visible without adding a second copy of a day's
+    // profile total when the user already contributed on that date.
+    counts.set(date, calendar ? Math.max(counts.get(date) ?? 0, manualCount) : manualCount)
+  }
+  return counts
+}
+
+export function getDailyContributionCount(items: Contribution[], date: string, calendar?: ContributionCalendar | null): number {
+  return dailyCounts(items, calendar).get(date) ?? 0
+}
+
+export function getStats(items: Contribution[], today = formatDate(new Date()), calendar?: ContributionCalendar | null): TrackerStats {
+  const counts = dailyCounts(items, calendar)
   const activeDates = [...counts.keys()].sort()
   const todayDate = dateFromKey(today)
   const todayKey = formatDate(todayDate)
   const currentWeekStart = shiftDate(todayDate, -((todayDate.getDay() + 6) % 7))
   const weekStartKey = formatDate(currentWeekStart)
-  const weekActions = validItems.filter((item) => item.date >= weekStartKey && item.date <= todayKey).length
+  const weekActions = [...counts].reduce((sum, [date, count]) => sum + (date >= weekStartKey && date <= todayKey ? count : 0), 0)
 
   let bestStreak = 0
   let run = 0
@@ -251,5 +344,5 @@ export function getStats(items: Contribution[], today = formatDate(new Date())):
       cursor = shiftDate(cursor, -1)
     }
   }
-  return { activeDays: counts.size, currentStreak, bestStreak, totalActions: validItems.length, weekActions }
+  return { activeDays: counts.size, currentStreak, bestStreak, totalActions: [...counts.values()].reduce((sum, count) => sum + count, 0), weekActions }
 }

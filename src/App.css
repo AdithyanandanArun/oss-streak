@@ -4,3 +4,51 @@
 @media(max-width:850px){.sidebar{width:74px;align-items:center;padding:26px 10px}.brand{font-size:0;gap:0;padding:0}.brand-dot{display:none}.brand-icon{width:34px}.workspace-label{font-size:0;margin:36px 0 5px}.nav-item{font-size:0;padding:13px;gap:0;justify-content:center}.nav-item svg{width:19px;height:19px}.nav-dot{display:none}.sidebar-note{display:none}.sidebar-footer{margin-top:auto;padding:20px 0 0;border-top:1px solid #edf0e6}.sidebar-footer div,.online-dot{display:none}main{margin-left:74px}.stats-grid{gap:10px}.hero-copy{padding:28px}.hero-card h2{font-size:26px}.hero-art{width:35%}.flame-tile{width:86px;height:96px;border-radius:20px}.flame-tile svg{width:62px;height:62px}.floating-code{width:30px;height:30px;font-size:16px}.code-one{left:4%}.code-two{right:4%}.bottom-grid{grid-template-columns:1.45fr 1fr}.stat-icon{width:21px;height:21px}.stat-number{font-size:28px}.goal-card .stat-number{font-size:27px}.goal-card .stat-number>span{display:block;margin:2px 0 0}.goal-card .progress-track{margin-top:7px}.stat-card p{line-height:1.5}.stat-label{font-size:8px}.page-footer>span:last-child{font-size:8px}}
 @media(max-width:650px){.sidebar{position:static;width:100%;height:65px;border-right:0;border-bottom:1px solid #e7e9e2;flex-direction:row;justify-content:space-between;padding:10px 20px}.brand{font-size:26px;gap:5px}.brand-dot{display:inline;margin-left:-5px}.brand-icon{width:25px}.brand-icon svg{width:25px;height:25px}.workspace-label,.sidebar-footer{display:none}.sidebar nav{display:flex;gap:6px}.nav-item{margin:0;padding:10px}.nav-item svg{width:18px;height:18px}.app-shell{display:block}main{margin:0}.topbar{height:49px;padding:0 20px;font-size:10px}.local-badge{font-size:8px}.page-content{padding:25px 20px 0}.page-heading{align-items:flex-start;margin-bottom:22px;gap:10px}.page-heading h1{font-size:24px;white-space:nowrap}.page-heading p{font-size:10px;line-height:1.7;max-width:230px}.eyebrow{font-size:8px}.date-chip{padding:7px 8px;margin-top:22px;font-size:10px;gap:4px;white-space:nowrap}.date-chip>span{font-size:8px}.greeting-mark{font-size:23px;margin-left:7px}.hero-card{min-height:300px}.hero-copy{padding:26px 23px}.hero-card h2{font-size:26px;position:relative;max-width:290px}.hero-card p{font-size:10px;max-width:255px;position:relative}.hero-eyebrow{font-size:8px;letter-spacing:1.2px}.hero-art{width:40%;opacity:.35;right:-30px;top:65px}.flame-tile{left:65%}.hero-copy .primary-button{position:relative}.hero-footnote{position:relative;font-size:8px}.stats-grid{grid-template-columns:repeat(2,1fr);gap:12px;margin:18px 0}.stat-card{padding:16px}.stat-label{font-size:10px}.stat-number{font-size:31px}.stat-number>span{font-size:10px}.stat-card p{font-size:9px}.stat-icon{width:24px;height:24px}.goal-card .stat-number>span{display:inline;margin-left:6px;font-size:8px}.goal-card .stat-number{margin-top:12px}.goal-card .progress-track{margin-top:9px}.bottom-grid{grid-template-columns:1fr;gap:18px;margin-top:18px}.section-heading{padding:20px 18px}.section-heading h2{font-size:13px}.section-heading p{font-size:9px}.small-badge{font-size:8px;padding:6px}.calendar-scroll{padding:0 18px}.calendar-wrap{min-width:580px}.calendar-footer{padding:16px 18px;font-size:8px}.legend{gap:2px;font-size:7px}.legend .heat-cell{width:7px;height:7px}.activity-list{padding-left:18px;padding-right:18px}.activity-panel .section-heading{padding-bottom:15px}.empty-state{padding-bottom:30px}.github-panel{padding:23px}.github-panel h2{font-size:17px}.github-panel>p{font-size:11px}.github-panel label{font-size:10px}.username-input input{font-size:12px;padding:12px}.import-button{font-size:11px;padding:12px}.privacy-note,.import-note{font-size:9px!important}.page-footer{align-items:flex-start;font-size:8px;padding:23px 0;line-height:1.7}.page-footer>span:last-child{max-width:140px;text-align:right}.footer-brand{font-size:12px}.footer-star{display:none}.notice{left:20px;right:20px;bottom:15px;transform:none;max-width:none;font-size:11px}dialog{padding:24px}.dialog-heading h2{font-size:21px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+
+/* Dark-first workspace palette */
+.app-shell{background:#10130f;color:#e5e9de}
+.sidebar,.topbar{background:#171b16;border-color:#2b3229}
+.topbar,.nav-item{color:#a5ad9a}
+.topbar strong{color:#d7ddce}
+.breadcrumb,.sidebar-footer div>span,.workspace-label,.eyebrow{color:#8f9986}
+.nav-item.active{background:#2a3522;color:#d8efa7}
+.nav-item:hover{background:#222a1f}
+.sidebar-note{background:#1c221a;border-color:#30382c}
+.sidebar-note p{color:#a5ae9a}
+.sidebar-footer{border-color:#2b3229}
+.avatar{background:#343c30;color:#e3e8da}
+.date-chip,.section-heading select{background:#1b211a;border-color:#384033;color:#c2cbb8}
+.panel,.stat-card{background:#191e18;border-color:#2c342a;color:#e5e9de}
+.stat-card p,.section-heading p,.page-heading p,.dialog-description,.settings-note{color:#9ba591}
+.stat-icon,.github-icon,.close-button{background:#252d22;border-color:#394333;color:#c4d3aa}
+.github-panel{background:#1c231a}
+.github-panel h2,.section-heading h2,.dialog-heading h2{color:#edf0e7}
+.github-panel>p,.github-panel label{color:#a3ad97}
+.username-input,dialog input,dialog select{background:#131811;border-color:#3a4434;color:#edf0e7}
+.import-button{background:#2e3a24;border-color:#465638;color:#d8efa7}
+.import-button:hover{background:#39482b}
+.privacy-note{color:#a1ab96!important}
+.import-note{border-color:#333c2d}
+.activity-list li{border-color:#2b3229}
+.activity-symbol{background:#263226;color:#c1d79a}
+.kind-pull_request{background:#30293a;color:#d0bce7}
+.kind-comment{background:#26323b;color:#bad3e4}
+.activity-detail>span,.activity-list time{color:#9ba591}
+.empty-state>span{background:#252f20;border-color:#394632;color:#c2d99b}
+.empty-state p{color:#9ba591}
+.text-button{color:#c9e79a}
+.heat-cell{background:#252b23}
+.heat-cell.level-1{background:#38492d}
+.heat-cell.level-2{background:#526b3d}
+.heat-cell.level-3{background:#76984e}
+.heat-cell.level-4{background:#a6c970}
+.heat-cell.is-today{outline-color:#d6ee9b}
+.calendar-footer{border-color:#2b3229;color:#a4ae98}
+.activity-detail strong,.activity-detail a{color:#e5e9de}
+.page-footer{color:#8f9986}
+.footer-brand,.footer-star{color:#a4bd78}
+dialog{background:#191f18;border-color:#384033;color:#e5e9de}
+.close-button:hover{background:#323c2e}
+.kind-options button{background:#20271e;border-color:#343d30;color:#b1bca5}
+.kind-options button.selected{background:#34462a;border-color:#69864a;color:#ddf3ae}
+.optional{color:#96a18c}
